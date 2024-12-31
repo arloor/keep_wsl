@@ -1,3 +1,4 @@
+mod logx;
 use std::{
     default,
     env::args,
@@ -197,6 +198,7 @@ fn service_entry(arguments: Vec<OsString>) {
 define_windows_service!(ffi_service_entry, service_entry);
 
 fn main() -> Result<(), windows_service::Error> {
+    let _ = logx::init_log(r"C:\Users\arloor\keep_wsl", "keep.log");
     service_dispatcher::start(SERVICE_NAME, ffi_service_entry)?;
     Ok(())
 }
@@ -211,11 +213,13 @@ pub fn create(matches: &ArgMatches) -> Result<(Runtime, impl Future<Output = Exi
     let main_fut = async move {
         let abort_signal = create_signal_monitor();
         let server = async {
-            let result = std::process::Command::new(r"C:\Users\arloor\Desktop\keep.bat").output();
+            let result = std::process::Command::new(r"C:\Users\arloor\Desktop\keep.bat")
+                // .args(["-d", "Debian","/usr/local/bin/keepalive"])
+                .output();
             match result {
                 Ok(output) => {
-                    let str = String::from_utf8(output.stdout)
-                        .unwrap_or("unknown".to_string())
+                    let str = String::from_utf8_lossy(&output.stdout)
+                        // .unwrap_or("unknown".to_string())
                         .trim()
                         .to_owned();
                     info!("keep.bat: {}", str);

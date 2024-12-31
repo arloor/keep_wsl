@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
+flexi_logger = "0.29.8"
 futures-util = "0.3.31"
 log = "0.4.22"
 sysexits = "0.8.5"
